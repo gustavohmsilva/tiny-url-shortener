@@ -67,8 +67,7 @@ func redirectToURL(w http.ResponseWriter, r *http.Request) {
 		if bucket == nil {
 			return errors.New("Bucket not found")
 		}
-		d := &destination
-		*d = bucket.Get([]byte(pathValues["ID"]))
+		destination = bucket.Get([]byte(pathValues["ID"]))
 		return nil
 	})
 	if err != nil {
