@@ -13,7 +13,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var bucketName = "shorturls"
 var db *bolt.DB
 
 type shortLink struct {
@@ -37,7 +36,7 @@ func createURL(w http.ResponseWriter, r *http.Request) {
 	}
 	desiredLink.ID = base64.URLEncoding.EncodeToString(randomBytes)
 	err = db.Update(func(tx *bolt.Tx) error {
-		bucket, err := tx.CreateBucketIfNotExists([]byte(bucketName))
+		bucket, err := tx.CreateBucketIfNotExists([]byte("TUS"))
 		if err != nil {
 			return err
 		}
@@ -56,18 +55,18 @@ func createURL(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	jsonResponse, _ := json.Marshal(desiredLink)
 	w.Write(jsonResponse)
-	return
 }
 
 func redirectToURL(w http.ResponseWriter, r *http.Request) {
 	pathValues := mux.Vars(r)
 	var destination []byte
 	err := db.View(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte(bucketName))
+		bucket := tx.Bucket([]byte("TUS"))
 		if bucket == nil {
 			return errors.New("Bucket not found")
 		}
-		destination = bucket.Get([]byte(pathValues["ID"]))
+		o := bucket.Get([]byte(pathValues["ID"]))
+		destination = append(destination, o...)
 		return nil
 	})
 	if err != nil {
@@ -79,7 +78,6 @@ func redirectToURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, string(destination), http.StatusMovedPermanently)
-	return
 }
 
 func main() {
