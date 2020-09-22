@@ -27,9 +27,7 @@ func createURL(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	size := 4
-	randomBytes := make([]byte, size)
-	_, err = rand.Read(randomBytes)
+	_, err = rand.Read(make([]byte, 4))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -40,9 +38,7 @@ func createURL(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return err
 		}
-		byteID := []byte(desiredLink.ID)
-		ByteDestination := []byte(desiredLink.Destination)
-		err = bucket.Put(byteID, ByteDestination)
+		err = bucket.Put([]byte(desiredLink.ID), []byte(desiredLink.Destination))
 		if err != nil {
 			return err
 		}
